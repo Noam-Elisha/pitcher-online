@@ -6,7 +6,159 @@
   <meta name="description" content="Musical drone and tuning tool for musicians. Play sustained tones with multiple timbres and tuning systems.">
   <meta name="theme-color" content="#0d1117">
   <title>Pitcher Online</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-surface: #161b22;
+  --bg-elevated: #21262d;
+  --bg-hover: #30363d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --accent: #58a6ff;
+  --accent-active: #1f6feb;
+  --accent-glow: rgba(31, 111, 235, 0.5);
+  --danger: #f85149;
+  --danger-hover: #da3633;
+  --border: #30363d;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: var(--bg-surface);
+  border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+}
+header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
+
+.mode-tabs { display: flex; gap: 4px; background: var(--bg-elevated); border-radius: var(--radius); padding: 3px; }
+.tab {
+  padding: 6px 16px; border: none; background: transparent; color: var(--text-secondary);
+  font-family: var(--font); font-size: 0.85rem; font-weight: 600; border-radius: 6px;
+  cursor: pointer; transition: all 0.15s ease; touch-action: manipulation;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active { background: var(--accent-active); color: #fff; }
+
+.settings-bar {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px;
+  padding: 10px 16px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
+}
+.setting-group { display: flex; flex-direction: column; gap: 3px; }
+.setting-group label {
+  font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.setting-group select, .setting-group input[type="number"] {
+  padding: 5px 8px; background: var(--bg-elevated); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.85rem; outline: none; transition: border-color 0.15s;
+}
+.setting-group select:focus, .setting-group input[type="number"]:focus { border-color: var(--accent); }
+.setting-group input[type="number"] { width: 70px; }
+.setting-group input[type="range"] { width: 80px; accent-color: var(--accent); cursor: pointer; }
+
+.ji-only { display: none; }
+.ji-only.visible { display: flex; }
+
+.btn-clear {
+  padding: 6px 14px; background: var(--danger); color: #fff; border: none;
+  border-radius: var(--radius-sm); font-family: var(--font); font-size: 0.85rem;
+  font-weight: 600; cursor: pointer; transition: background 0.15s;
+  touch-action: manipulation; margin-left: auto;
+}
+.btn-clear:hover { background: var(--danger-hover); }
+
+main { padding: 16px; max-width: 900px; margin: 0 auto; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+.note-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.note-btn {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 14px 8px; min-height: 64px;
+  background: var(--bg-elevated); color: var(--text-primary);
+  border: 2px solid var(--border); border-radius: var(--radius);
+  font-family: var(--font); font-size: 1.1rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s ease;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none;
+}
+.note-btn .note-freq { font-size: 0.65rem; font-weight: 400; color: var(--text-secondary); margin-top: 2px; }
+.note-btn:hover { background: var(--bg-hover); border-color: var(--accent); }
+.note-btn.active {
+  background: var(--accent-active); border-color: var(--accent); color: #fff;
+  box-shadow: 0 0 16px var(--accent-glow), 0 0 4px var(--accent-glow);
+}
+.note-btn.active .note-freq { color: rgba(255, 255, 255, 0.7); }
+.note-btn.sharp { background: var(--bg-primary); }
+.note-btn.sharp.active { background: var(--accent-active); }
+
+.active-notes-display {
+  margin-top: 16px; min-height: 28px; padding: 8px 12px;
+  background: var(--bg-surface); border-radius: var(--radius);
+  font-size: 0.85rem; color: var(--text-secondary);
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+}
+.active-note-tag {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px;
+  background: var(--accent-active); color: #fff; border-radius: 12px;
+  font-size: 0.75rem; font-weight: 600;
+}
+
+.chord-grid { display: flex; flex-direction: column; gap: 6px; }
+.chord-row { display: flex; gap: 4px; align-items: center; }
+.chord-root-label { width: 36px; flex-shrink: 0; font-weight: 700; font-size: 0.9rem; color: var(--text-secondary); text-align: center; }
+.chord-types { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.chord-btn {
+  flex: 1; min-width: 44px; padding: 10px 4px; background: var(--bg-elevated);
+  color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.75rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s ease; touch-action: manipulation;
+  user-select: none; -webkit-user-select: none; text-align: center;
+}
+.chord-btn:hover { background: var(--bg-hover); border-color: var(--accent); }
+.chord-btn.active {
+  background: var(--accent-active); border-color: var(--accent); color: #fff;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+@media (max-width: 479px) {
+  .note-grid { grid-template-columns: repeat(3, 1fr); }
+  .settings-bar { gap: 8px; padding: 8px 12px; }
+  header h1 { font-size: 1rem; }
+  .chord-btn { font-size: 0.65rem; padding: 8px 2px; min-width: 36px; }
+  .chord-root-label { width: 28px; font-size: 0.8rem; }
+}
+@media (min-width: 480px) and (max-width: 767px) {
+  .note-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 768px) {
+  .note-grid { grid-template-columns: repeat(6, 1fr); }
+  .note-btn { min-height: 72px; font-size: 1.2rem; }
+  .chord-btn { padding: 12px 8px; font-size: 0.85rem; }
+}
+@media (min-width: 1024px) {
+  .note-grid { grid-template-columns: repeat(12, 1fr); }
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 4px; }
+  </style>
 </head>
 <body>
   <header>
@@ -28,7 +180,6 @@
         <option value="strings">Strings</option>
       </select>
     </div>
-
     <div class="setting-group">
       <label for="tuning-system">Tuning</label>
       <select id="tuning-system">
@@ -36,50 +187,35 @@
         <option value="just">Just Intonation</option>
       </select>
     </div>
-
     <div class="setting-group">
       <label for="a4-ref">A4 (Hz)</label>
       <input id="a4-ref" type="number" value="440" min="400" max="480" step="1">
     </div>
-
     <div class="setting-group ji-only" id="ji-root-group">
       <label for="ji-root">JI Root</label>
       <select id="ji-root">
-        <option value="C">C</option>
-        <option value="C#">C#</option>
-        <option value="D">D</option>
-        <option value="D#">D#</option>
-        <option value="E">E</option>
-        <option value="F">F</option>
-        <option value="F#">F#</option>
-        <option value="G">G</option>
-        <option value="G#">G#</option>
-        <option value="A" selected>A</option>
-        <option value="A#">A#</option>
-        <option value="B">B</option>
+        <option value="C">C</option><option value="C#">C#</option>
+        <option value="D">D</option><option value="D#">D#</option>
+        <option value="E">E</option><option value="F">F</option>
+        <option value="F#">F#</option><option value="G">G</option>
+        <option value="G#">G#</option><option value="A" selected>A</option>
+        <option value="A#">A#</option><option value="B">B</option>
       </select>
     </div>
-
     <div class="setting-group">
       <label for="octave-select">Octave</label>
       <select id="octave-select">
-        <option value="0">0</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4" selected>4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
+        <option value="0">0</option><option value="1">1</option>
+        <option value="2">2</option><option value="3">3</option>
+        <option value="4" selected>4</option><option value="5">5</option>
+        <option value="6">6</option><option value="7">7</option>
         <option value="8">8</option>
       </select>
     </div>
-
     <div class="setting-group">
       <label for="volume-slider">Volume</label>
       <input id="volume-slider" type="range" min="0" max="100" value="70">
     </div>
-
     <button id="clear-all" class="btn-clear">Clear All</button>
   </div>
 
@@ -88,18 +224,339 @@
       <div class="note-grid" id="note-grid"></div>
       <div class="active-notes-display" id="active-notes-display"></div>
     </div>
-
     <div id="chord-panel" class="panel">
       <div class="chord-grid" id="chord-grid"></div>
     </div>
   </main>
 
-  <div id="audio-init-overlay" class="overlay">
-    <div class="overlay-content">
-      <p>Tap anywhere to enable audio</p>
-    </div>
-  </div>
+  <script>
+// ===== Tuning =====
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const NOTE_INDEX = Object.fromEntries(NOTE_NAMES.map((n, i) => [n, i]));
+const JI_RATIOS = [1/1, 16/15, 9/8, 6/5, 5/4, 4/3, 45/32, 3/2, 8/5, 5/3, 16/9, 15/8];
 
-  <script type="module" src="js/app.js"></script>
+function getMidiNumber(noteName, octave) {
+  return (octave + 1) * 12 + NOTE_INDEX[noteName];
+}
+
+function getFrequency(noteName, octave, opts = {}) {
+  const { system = '12tet', a4Ref = 440, jiRoot = 'A' } = opts;
+  if (system === 'just') {
+    const rootFreqAt0 = a4Ref * Math.pow(2, (getMidiNumber(jiRoot, 0) - 69) / 12);
+    const interval = ((NOTE_INDEX[noteName] - NOTE_INDEX[jiRoot]) % 12 + 12) % 12;
+    return rootFreqAt0 * JI_RATIOS[interval] * Math.pow(2, octave);
+  }
+  return a4Ref * Math.pow(2, (getMidiNumber(noteName, octave) - 69) / 12);
+}
+
+// ===== Timbres =====
+function createSine(ctx, freq) {
+  const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = freq;
+  return { nodes: [osc], output: osc, oscillators: [osc] };
+}
+
+function createWarmPad(ctx, freq) {
+  const merger = ctx.createGain(); merger.gain.value = 0.4;
+  const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 2000; filter.Q.value = 0.7;
+  const oscs = [0, 7, -7].map(d => {
+    const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = freq; o.detune.value = d; o.connect(merger); return o;
+  });
+  merger.connect(filter);
+  return { nodes: [...oscs, merger, filter], output: filter, oscillators: oscs };
+}
+
+function createBrightPad(ctx, freq) {
+  const merger = ctx.createGain(); merger.gain.value = 0.5;
+  const oscs = [0, 5].map(d => {
+    const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = freq; o.detune.value = d; o.connect(merger); return o;
+  });
+  return { nodes: [...oscs, merger], output: merger, oscillators: oscs };
+}
+
+function createOrgan(ctx, freq) {
+  const merger = ctx.createGain(); merger.gain.value = 0.35;
+  const oscs = [{f: freq, g: 1}, {f: freq*2, g: 0.5}, {f: freq*3, g: 0.25}].map(h => {
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = h.f;
+    const g = ctx.createGain(); g.gain.value = h.g; o.connect(g); g.connect(merger); return o;
+  });
+  return { nodes: [...oscs, merger], output: merger, oscillators: oscs };
+}
+
+function createStrings(ctx, freq) {
+  const merger = ctx.createGain(); merger.gain.value = 0.4;
+  const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 4000; filter.Q.value = 0.5;
+  const oscs = [3, -3].map(d => {
+    const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = freq; o.detune.value = d; o.connect(merger); return o;
+  });
+  merger.connect(filter);
+  const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 4.5;
+  const lfoGain = ctx.createGain(); lfoGain.gain.value = 3;
+  lfo.connect(lfoGain); oscs.forEach(o => lfoGain.connect(o.detune));
+  return { nodes: [...oscs, merger, filter, lfo, lfoGain], output: filter, oscillators: [...oscs, lfo] };
+}
+
+const TIMBRES = { sine: createSine, warmPad: createWarmPad, brightPad: createBrightPad, organ: createOrgan, strings: createStrings };
+
+// ===== Chord Data =====
+const CHORD_TYPES = [
+  { id: 'major', name: 'Maj', intervals: [0, 4, 7] },
+  { id: 'minor', name: 'Min', intervals: [0, 3, 7] },
+  { id: 'dom7',  name: '7',   intervals: [0, 4, 7, 10] },
+  { id: 'dim',   name: 'Dim', intervals: [0, 3, 6] },
+  { id: 'halfdim', name: 'Hdim', intervals: [0, 3, 6, 10] },
+  { id: 'aug',   name: 'Aug', intervals: [0, 4, 8] },
+];
+
+function getChordNotes(rootName, chordTypeId, octave) {
+  const ct = CHORD_TYPES.find(c => c.id === chordTypeId);
+  if (!ct) return [];
+  const ri = NOTE_INDEX[rootName];
+  return ct.intervals.map(iv => ({
+    noteName: NOTE_NAMES[(ri + iv) % 12],
+    octave: octave + Math.floor((ri + iv) / 12),
+  }));
+}
+
+// ===== Audio Engine =====
+let audioCtx = null, masterGain = null, masterVolume = 0.7;
+const voices = new Map();
+const FADE_IN = 0.03, FADE_OUT = 0.05;
+
+function initAudio() {
+  if (audioCtx) { if (audioCtx.state === 'suspended') audioCtx.resume(); return; }
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain(); masterGain.gain.value = masterVolume;
+  masterGain.connect(audioCtx.destination);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  });
+}
+
+function setMasterVolume(vol) {
+  masterVolume = vol;
+  if (masterGain) masterGain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.02);
+}
+
+function updateVolumeScaling() {
+  if (!masterGain) return;
+  const count = voices.size;
+  masterGain.gain.setTargetAtTime(count > 0 ? masterVolume / Math.sqrt(count) : masterVolume, audioCtx.currentTime, 0.05);
+}
+
+function startVoice(id, frequency, timbreId) {
+  if (!audioCtx || voices.has(id)) return;
+  const factory = TIMBRES[timbreId]; if (!factory) return;
+  const { nodes, output, oscillators } = factory(audioCtx, frequency);
+  const vg = audioCtx.createGain();
+  vg.gain.setValueAtTime(0, audioCtx.currentTime);
+  vg.gain.linearRampToValueAtTime(1, audioCtx.currentTime + FADE_IN);
+  output.connect(vg); vg.connect(masterGain);
+  oscillators.forEach(o => o.start());
+  voices.set(id, { nodes, oscillators, voiceGain: vg, frequency, timbreId });
+  updateVolumeScaling();
+}
+
+function stopVoice(id) {
+  const v = voices.get(id); if (!v) return Promise.resolve();
+  voices.delete(id); updateVolumeScaling();
+  const now = audioCtx.currentTime;
+  v.voiceGain.gain.cancelScheduledValues(now);
+  v.voiceGain.gain.setValueAtTime(v.voiceGain.gain.value, now);
+  v.voiceGain.gain.linearRampToValueAtTime(0, now + FADE_OUT);
+  return new Promise(resolve => {
+    setTimeout(() => {
+      v.oscillators.forEach(o => { try { o.stop(); } catch(e) {} });
+      v.nodes.forEach(n => { try { n.disconnect(); } catch(e) {} });
+      try { v.voiceGain.disconnect(); } catch(e) {}
+      resolve();
+    }, FADE_OUT * 1000 + 10);
+  });
+}
+
+function clearAllVoices() {
+  return Promise.all([...voices.keys()].map(id => stopVoice(id)));
+}
+
+function rebuildAllVoices(timbreId, freqMap) {
+  const active = [...voices.entries()];
+  return Promise.all(active.map(([id]) => stopVoice(id))).then(() => {
+    active.forEach(([id, v]) => startVoice(id, freqMap.get(id) || v.frequency, timbreId));
+  });
+}
+
+function updateFrequencies(freqMap, timbreId) {
+  const active = [...voices.entries()];
+  return Promise.all(active.map(([id]) => stopVoice(id))).then(() => {
+    active.forEach(([id, v]) => startVoice(id, freqMap.get(id) || v.frequency, timbreId));
+  });
+}
+
+// ===== State =====
+const state = {
+  mode: 'drone', timbre: 'sine', tuningSystem: '12tet', a4Ref: 440,
+  jiRoot: 'A', octave: 4, volume: 0.7,
+  activeDrones: new Map(), activeChordRoot: null, activeChordType: null,
+};
+
+// ===== DOM =====
+const noteGrid = document.getElementById('note-grid');
+const chordGrid = document.getElementById('chord-grid');
+const activeNotesDisplay = document.getElementById('active-notes-display');
+const dronePanel = document.getElementById('drone-panel');
+const chordPanel = document.getElementById('chord-panel');
+const timbreSelect = document.getElementById('timbre-select');
+const tuningSysEl = document.getElementById('tuning-system');
+const a4RefInput = document.getElementById('a4-ref');
+const jiRootGroup = document.getElementById('ji-root-group');
+const jiRootSelect = document.getElementById('ji-root');
+const octaveSelect = document.getElementById('octave-select');
+const volumeSlider = document.getElementById('volume-slider');
+const clearAllBtn = document.getElementById('clear-all');
+const modeTabs = document.querySelectorAll('.tab');
+
+const SHARPS = new Set(['C#', 'D#', 'F#', 'G#', 'A#']);
+
+function tuningOpts() { return { system: state.tuningSystem, a4Ref: state.a4Ref, jiRoot: state.jiRoot }; }
+function nid(name, oct) { return `${name}${oct}`; }
+
+function ensureAudio() { initAudio(); setMasterVolume(state.volume); }
+
+function buildFreqMap() {
+  const m = new Map();
+  for (const [id, info] of state.activeDrones) m.set(id, getFrequency(info.noteName, info.octave, tuningOpts()));
+  return m;
+}
+
+// ===== Build UI =====
+function buildNoteGrid() {
+  noteGrid.innerHTML = '';
+  NOTE_NAMES.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'note-btn' + (SHARPS.has(name) ? ' sharp' : '');
+    btn.dataset.note = name;
+    btn.innerHTML = `<span class="note-name">${name}</span><span class="note-freq"></span>`;
+    btn.addEventListener('pointerdown', e => { e.preventDefault(); handleNoteClick(name); });
+    noteGrid.appendChild(btn);
+  });
+}
+
+function buildChordGrid() {
+  chordGrid.innerHTML = '';
+  NOTE_NAMES.forEach(root => {
+    const row = document.createElement('div'); row.className = 'chord-row';
+    const label = document.createElement('div'); label.className = 'chord-root-label'; label.textContent = root;
+    row.appendChild(label);
+    const types = document.createElement('div'); types.className = 'chord-types';
+    CHORD_TYPES.forEach(ct => {
+      const btn = document.createElement('button'); btn.className = 'chord-btn';
+      btn.dataset.root = root; btn.dataset.chord = ct.id; btn.textContent = ct.name;
+      btn.addEventListener('pointerdown', e => { e.preventDefault(); handleChordClick(root, ct.id); });
+      types.appendChild(btn);
+    });
+    row.appendChild(types); chordGrid.appendChild(row);
+  });
+}
+
+// ===== Render =====
+function render() {
+  const activeNames = new Set();
+  for (const [, info] of state.activeDrones) { if (info.octave === state.octave) activeNames.add(info.noteName); }
+  noteGrid.querySelectorAll('.note-btn').forEach(btn => {
+    const name = btn.dataset.note;
+    btn.classList.toggle('active', activeNames.has(name));
+    const fe = btn.querySelector('.note-freq');
+    if (fe) fe.textContent = getFrequency(name, state.octave, tuningOpts()).toFixed(1) + ' Hz';
+  });
+
+  if (state.activeDrones.size === 0) {
+    activeNotesDisplay.innerHTML = '<span style="opacity:0.5">No active drones</span>';
+  } else {
+    activeNotesDisplay.innerHTML = '';
+    [...state.activeDrones.keys()].sort((a, b) => {
+      const p = id => { const m = id.match(/^([A-G]#?)(\d+)$/); return m ? parseInt(m[2]) * 12 + NOTE_NAMES.indexOf(m[1]) : 0; };
+      return p(a) - p(b);
+    }).forEach(id => {
+      const tag = document.createElement('span'); tag.className = 'active-note-tag'; tag.textContent = id;
+      activeNotesDisplay.appendChild(tag);
+    });
+  }
+
+  chordGrid.querySelectorAll('.chord-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.root === state.activeChordRoot && btn.dataset.chord === state.activeChordType);
+  });
+
+  jiRootGroup.classList.toggle('visible', state.tuningSystem === 'just');
+  dronePanel.classList.toggle('active', state.mode === 'drone');
+  chordPanel.classList.toggle('active', state.mode === 'chord');
+  modeTabs.forEach(t => t.classList.toggle('active', t.dataset.mode === state.mode));
+}
+
+// ===== Handlers =====
+function handleNoteClick(name) {
+  ensureAudio();
+  const id = nid(name, state.octave);
+  if (state.activeDrones.has(id)) { stopVoice(id); state.activeDrones.delete(id); }
+  else { startVoice(id, getFrequency(name, state.octave, tuningOpts()), state.timbre); state.activeDrones.set(id, { noteName: name, octave: state.octave }); }
+  render();
+}
+
+function handleChordClick(root, type) {
+  ensureAudio();
+  if (state.activeChordRoot === root && state.activeChordType === type) {
+    clearAllVoices(); state.activeDrones.clear(); state.activeChordRoot = null; state.activeChordType = null; render(); return;
+  }
+  clearAllVoices(); state.activeDrones.clear();
+  getChordNotes(root, type, state.octave).forEach(n => {
+    const id = nid(n.noteName, n.octave);
+    startVoice(id, getFrequency(n.noteName, n.octave, tuningOpts()), state.timbre);
+    state.activeDrones.set(id, { noteName: n.noteName, octave: n.octave });
+  });
+  state.activeChordRoot = root; state.activeChordType = type; render();
+}
+
+timbreSelect.addEventListener('change', () => {
+  state.timbre = timbreSelect.value;
+  if (state.activeDrones.size > 0) { ensureAudio(); rebuildAllVoices(state.timbre, buildFreqMap()); }
+});
+tuningSysEl.addEventListener('change', () => {
+  state.tuningSystem = tuningSysEl.value;
+  if (state.activeDrones.size > 0) { ensureAudio(); updateFrequencies(buildFreqMap(), state.timbre); }
+  render();
+});
+a4RefInput.addEventListener('change', () => {
+  state.a4Ref = Math.min(480, Math.max(400, parseFloat(a4RefInput.value) || 440));
+  a4RefInput.value = state.a4Ref;
+  if (state.activeDrones.size > 0) { ensureAudio(); updateFrequencies(buildFreqMap(), state.timbre); }
+  render();
+});
+jiRootSelect.addEventListener('change', () => {
+  state.jiRoot = jiRootSelect.value;
+  if (state.tuningSystem === 'just' && state.activeDrones.size > 0) { ensureAudio(); updateFrequencies(buildFreqMap(), state.timbre); }
+  render();
+});
+octaveSelect.addEventListener('change', () => { state.octave = parseInt(octaveSelect.value); render(); });
+volumeSlider.addEventListener('input', () => { state.volume = parseInt(volumeSlider.value) / 100; setMasterVolume(state.volume); });
+
+clearAllBtn.addEventListener('pointerdown', e => {
+  e.preventDefault(); clearAllVoices(); state.activeDrones.clear();
+  state.activeChordRoot = null; state.activeChordType = null; render();
+});
+
+modeTabs.forEach(tab => {
+  tab.addEventListener('pointerdown', e => {
+    e.preventDefault(); const mode = tab.dataset.mode; if (mode === state.mode) return;
+    clearAllVoices(); state.activeDrones.clear();
+    state.activeChordRoot = null; state.activeChordType = null; state.mode = mode;
+    if (mode === 'chord' && state.octave > 5) { state.octave = 3; octaveSelect.value = '3'; }
+    render();
+  });
+});
+
+// ===== Init =====
+ensureAudio();
+buildNoteGrid();
+buildChordGrid();
+render();
+  </script>
 </body>
 </html>
