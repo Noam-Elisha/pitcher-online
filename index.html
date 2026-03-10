@@ -19,8 +19,8 @@
   --accent: #58a6ff;
   --accent-active: #1f6feb;
   --accent-glow: rgba(31, 111, 235, 0.5);
-  --diatonic: #1a3a2a;
-  --diatonic-border: #2ea043;
+  --diatonic: var(--bg-elevated);
+  --diatonic-border: var(--border);
   --danger: #f85149;
   --danger-hover: #da3633;
   --border: #30363d;
@@ -106,8 +106,7 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
   box-shadow: 0 0 16px var(--accent-glow), 0 0 4px var(--accent-glow);
 }
 .note-btn.active .note-freq { color: rgba(255, 255, 255, 0.7); }
-.note-btn.diatonic { background: var(--diatonic); border-color: var(--diatonic-border); }
-.note-btn.diatonic:hover { background: #1f4a33; }
+.note-btn.diatonic { background: var(--bg-elevated); }
 .note-btn.diatonic.active { background: var(--accent-active); border-color: var(--accent); }
 .note-btn.chromatic { background: var(--bg-primary); }
 .note-btn.chromatic.active { background: var(--accent-active); }
