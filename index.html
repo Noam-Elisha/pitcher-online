@@ -38,12 +38,19 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.app-shell {
+  width: 100%; max-width: 500px;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+  margin: 16px;
 }
 
 header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; background: var(--bg-surface);
-  border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
 }
 header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
 
@@ -58,7 +65,7 @@ header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
 
 .settings-bar {
   display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px;
-  padding: 10px 16px; background: var(--bg-surface); border-bottom: 1px solid var(--border);
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
 }
 .setting-group { display: flex; flex-direction: column; gap: 3px; }
 .setting-group label {
@@ -85,11 +92,25 @@ header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
 }
 .btn-clear:hover { background: var(--danger-hover); }
 
-main { padding: 16px; max-width: 900px; margin: 0 auto; }
+main { padding: 16px; padding-bottom: 12px; }
+.octave-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-top: 1px solid var(--border);
+}
+.octave-nav button {
+  padding: 8px 20px; background: var(--bg-elevated); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: var(--font); font-size: 1rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s ease; touch-action: manipulation;
+}
+.octave-nav button:hover { background: var(--bg-hover); border-color: var(--accent); }
+.octave-nav button:disabled { opacity: 0.3; cursor: default; }
+.octave-nav button:disabled:hover { background: var(--bg-elevated); border-color: var(--border); }
+.octave-nav .octave-label { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); }
 .panel { display: none; }
 .panel.active { display: block; }
 
-.note-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .note-btn {
   position: relative; display: flex; flex-direction: column; align-items: center;
   justify-content: center; padding: 14px 8px; min-height: 64px;
@@ -141,22 +162,15 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
 }
 
 @media (max-width: 479px) {
-  .note-grid { grid-template-columns: repeat(3, 1fr); }
   .settings-bar { gap: 8px; padding: 8px 12px; }
   header h1 { font-size: 1rem; }
-  .chord-btn { font-size: 0.6rem; padding: 8px 1px; min-width: 32px; }
-  .chord-root-label { width: 28px; font-size: 0.8rem; }
-}
-@media (min-width: 480px) and (max-width: 767px) {
-  .note-grid { grid-template-columns: repeat(4, 1fr); }
+  .chord-btn { font-size: 0.55rem; padding: 7px 0; min-width: 0; }
+  .chord-types { gap: 2px; flex-wrap: nowrap; }
+  .chord-root-label { width: 22px; font-size: 0.75rem; }
+  .chord-row { gap: 2px; }
 }
 @media (min-width: 768px) {
-  .note-grid { grid-template-columns: repeat(6, 1fr); }
-  .note-btn { min-height: 72px; font-size: 1.2rem; }
   .chord-btn { padding: 12px 8px; font-size: 0.8rem; }
-}
-@media (min-width: 1024px) {
-  .note-grid { grid-template-columns: repeat(12, 1fr); }
 }
 
 ::-webkit-scrollbar { width: 8px; }
@@ -165,6 +179,7 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
   </style>
 </head>
 <body>
+  <div class="app-shell">
   <header>
     <h1>Pitcher Online</h1>
     <div class="mode-tabs">
@@ -193,7 +208,7 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
     </div>
     <div class="setting-group drone-only" id="a4-group">
       <label for="a4-ref">A4 (Hz)</label>
-      <input id="a4-ref" type="number" value="440" min="400" max="480" step="1">
+      <input id="a4-ref" type="number" value="440" step="1">
     </div>
     <div class="setting-group drone-only" id="ji-root-group">
       <label for="ji-root">JI Root</label>
@@ -204,16 +219,6 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
         <option value="F#">F#</option><option value="G">G</option>
         <option value="G#">G#</option><option value="A" selected>A</option>
         <option value="A#">A#</option><option value="B">B</option>
-      </select>
-    </div>
-    <div class="setting-group">
-      <label for="octave-select">Octave</label>
-      <select id="octave-select">
-        <option value="0">0</option><option value="1">1</option>
-        <option value="2">2</option><option value="3">3</option>
-        <option value="4" selected>4</option><option value="5">5</option>
-        <option value="6">6</option><option value="7">7</option>
-        <option value="8">8</option>
       </select>
     </div>
     <div class="setting-group">
@@ -232,6 +237,12 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
       <div class="chord-grid" id="chord-grid"></div>
     </div>
   </main>
+  <div class="octave-nav">
+    <button id="octave-down" aria-label="Octave down">&larr;</button>
+    <span class="octave-label" id="octave-label">Octave 4</span>
+    <button id="octave-up" aria-label="Octave up">&rarr;</button>
+  </div>
+  </div>
 
   <script>
 // ===== Tuning =====
@@ -256,7 +267,10 @@ function getFrequency(noteName, octave, opts = {}) {
   if (system === 'just') {
     const rootFreqAt0 = a4Ref * Math.pow(2, (getMidiNumber(jiRoot, 0) - 69) / 12);
     const interval = ((NOTE_INDEX[noteName] - NOTE_INDEX[jiRoot]) % 12 + 12) % 12;
-    return rootFreqAt0 * JI_RATIOS[interval] * Math.pow(2, octave);
+    // When the note is below the root in chromatic order (C..B), the ascending
+    // JI ratio wraps past the octave boundary, so compensate by dropping an octave
+    const octAdj = (interval > 0 && NOTE_INDEX[noteName] < NOTE_INDEX[jiRoot]) ? octave - 1 : octave;
+    return rootFreqAt0 * JI_RATIOS[interval] * Math.pow(2, octAdj);
   }
   return a4Ref * Math.pow(2, (getMidiNumber(noteName, octave) - 69) / 12);
 }
@@ -317,6 +331,7 @@ const CHORD_TYPES = [
   { id: 'maj7',    name: 'Maj7', intervals: [0, 4, 7, 11] },
   { id: 'min7',    name: 'Min7', intervals: [0, 3, 7, 10] },
   { id: 'dim',     name: 'Dim',  intervals: [0, 3, 6] },
+  { id: 'dim7',    name: 'Dim7', intervals: [0, 3, 6, 9] },
   { id: 'halfdim', name: 'Hdim', intervals: [0, 3, 6, 10] },
   { id: 'aug',     name: 'Aug',  intervals: [0, 4, 8] },
 ];
@@ -419,7 +434,9 @@ const jiRootGroup = document.getElementById('ji-root-group');
 const jiRootSelect = document.getElementById('ji-root');
 const tuningGroup = document.getElementById('tuning-group');
 const a4Group = document.getElementById('a4-group');
-const octaveSelect = document.getElementById('octave-select');
+const octaveDownBtn = document.getElementById('octave-down');
+const octaveUpBtn = document.getElementById('octave-up');
+const octaveLabel = document.getElementById('octave-label');
 const volumeSlider = document.getElementById('volume-slider');
 const clearAllBtn = document.getElementById('clear-all');
 const modeTabs = document.querySelectorAll('.tab');
@@ -511,6 +528,10 @@ function render() {
   dronePanel.classList.toggle('active', isDrone);
   chordPanel.classList.toggle('active', !isDrone);
   modeTabs.forEach(t => t.classList.toggle('active', t.dataset.mode === state.mode));
+
+  octaveLabel.textContent = 'Octave ' + state.octave;
+  octaveDownBtn.disabled = state.octave <= 0;
+  octaveUpBtn.disabled = state.octave >= 8;
 }
 
 // ===== Handlers =====
@@ -547,8 +568,8 @@ tuningSysEl.addEventListener('change', () => {
   render();
 });
 a4RefInput.addEventListener('change', () => {
-  state.a4Ref = Math.min(480, Math.max(400, parseFloat(a4RefInput.value) || 440));
-  a4RefInput.value = state.a4Ref;
+  const val = parseFloat(a4RefInput.value);
+  if (!isNaN(val) && val > 0) { state.a4Ref = val; } else { a4RefInput.value = state.a4Ref; }
   if (state.activeDrones.size > 0) { ensureAudio(); updateFrequencies(buildFreqMap(), state.timbre); }
   render();
 });
@@ -557,7 +578,8 @@ jiRootSelect.addEventListener('change', () => {
   if (state.tuningSystem === 'just' && state.activeDrones.size > 0) { ensureAudio(); updateFrequencies(buildFreqMap(), state.timbre); }
   render();
 });
-octaveSelect.addEventListener('change', () => { state.octave = parseInt(octaveSelect.value); render(); });
+octaveDownBtn.addEventListener('pointerdown', e => { e.preventDefault(); if (state.octave > 0) { state.octave--; render(); } });
+octaveUpBtn.addEventListener('pointerdown', e => { e.preventDefault(); if (state.octave < 8) { state.octave++; render(); } });
 volumeSlider.addEventListener('input', () => { state.volume = parseInt(volumeSlider.value) / 100; setMasterVolume(state.volume); });
 
 clearAllBtn.addEventListener('pointerdown', e => {
@@ -570,7 +592,7 @@ modeTabs.forEach(tab => {
     e.preventDefault(); const mode = tab.dataset.mode; if (mode === state.mode) return;
     clearAllVoices(); state.activeDrones.clear();
     state.activeChordRoot = null; state.activeChordType = null; state.mode = mode;
-    if (mode === 'chord' && state.octave > 5) { state.octave = 3; octaveSelect.value = '3'; }
+    if (mode === 'chord' && state.octave > 5) { state.octave = 3; }
     render();
   });
 });
