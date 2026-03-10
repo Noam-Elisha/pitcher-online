@@ -19,6 +19,8 @@
   --accent: #58a6ff;
   --accent-active: #1f6feb;
   --accent-glow: rgba(31, 111, 235, 0.5);
+  --diatonic: #1a3a2a;
+  --diatonic-border: #2ea043;
   --danger: #f85149;
   --danger-hover: #da3633;
   --border: #30363d;
@@ -72,8 +74,8 @@ header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
 .setting-group input[type="number"] { width: 70px; }
 .setting-group input[type="range"] { width: 80px; accent-color: var(--accent); cursor: pointer; }
 
-.ji-only { display: none; }
-.ji-only.visible { display: flex; }
+.drone-only { display: none; }
+.drone-only.visible { display: flex; }
 
 .btn-clear {
   padding: 6px 14px; background: var(--danger); color: #fff; border: none;
@@ -104,8 +106,11 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
   box-shadow: 0 0 16px var(--accent-glow), 0 0 4px var(--accent-glow);
 }
 .note-btn.active .note-freq { color: rgba(255, 255, 255, 0.7); }
-.note-btn.sharp { background: var(--bg-primary); }
-.note-btn.sharp.active { background: var(--accent-active); }
+.note-btn.diatonic { background: var(--diatonic); border-color: var(--diatonic-border); }
+.note-btn.diatonic:hover { background: #1f4a33; }
+.note-btn.diatonic.active { background: var(--accent-active); border-color: var(--accent); }
+.note-btn.chromatic { background: var(--bg-primary); }
+.note-btn.chromatic.active { background: var(--accent-active); }
 
 .active-notes-display {
   margin-top: 16px; min-height: 28px; padding: 8px 12px;
@@ -124,9 +129,9 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
 .chord-root-label { width: 36px; flex-shrink: 0; font-weight: 700; font-size: 0.9rem; color: var(--text-secondary); text-align: center; }
 .chord-types { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
 .chord-btn {
-  flex: 1; min-width: 44px; padding: 10px 4px; background: var(--bg-elevated);
+  flex: 1; min-width: 38px; padding: 10px 2px; background: var(--bg-elevated);
   color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  font-family: var(--font); font-size: 0.75rem; font-weight: 600;
+  font-family: var(--font); font-size: 0.7rem; font-weight: 600;
   cursor: pointer; transition: all 0.15s ease; touch-action: manipulation;
   user-select: none; -webkit-user-select: none; text-align: center;
 }
@@ -140,7 +145,7 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
   .note-grid { grid-template-columns: repeat(3, 1fr); }
   .settings-bar { gap: 8px; padding: 8px 12px; }
   header h1 { font-size: 1rem; }
-  .chord-btn { font-size: 0.65rem; padding: 8px 2px; min-width: 36px; }
+  .chord-btn { font-size: 0.6rem; padding: 8px 1px; min-width: 32px; }
   .chord-root-label { width: 28px; font-size: 0.8rem; }
 }
 @media (min-width: 480px) and (max-width: 767px) {
@@ -149,7 +154,7 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
 @media (min-width: 768px) {
   .note-grid { grid-template-columns: repeat(6, 1fr); }
   .note-btn { min-height: 72px; font-size: 1.2rem; }
-  .chord-btn { padding: 12px 8px; font-size: 0.85rem; }
+  .chord-btn { padding: 12px 8px; font-size: 0.8rem; }
 }
 @media (min-width: 1024px) {
   .note-grid { grid-template-columns: repeat(12, 1fr); }
@@ -180,18 +185,18 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
         <option value="strings">Strings</option>
       </select>
     </div>
-    <div class="setting-group">
+    <div class="setting-group drone-only" id="tuning-group">
       <label for="tuning-system">Tuning</label>
       <select id="tuning-system">
         <option value="12tet">Equal (12-TET)</option>
         <option value="just">Just Intonation</option>
       </select>
     </div>
-    <div class="setting-group">
+    <div class="setting-group drone-only" id="a4-group">
       <label for="a4-ref">A4 (Hz)</label>
       <input id="a4-ref" type="number" value="440" min="400" max="480" step="1">
     </div>
-    <div class="setting-group ji-only" id="ji-root-group">
+    <div class="setting-group drone-only" id="ji-root-group">
       <label for="ji-root">JI Root</label>
       <select id="ji-root">
         <option value="C">C</option><option value="C#">C#</option>
@@ -234,6 +239,14 @@ main { padding: 16px; max-width: 900px; margin: 0 auto; }
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const NOTE_INDEX = Object.fromEntries(NOTE_NAMES.map((n, i) => [n, i]));
 const JI_RATIOS = [1/1, 16/15, 9/8, 6/5, 5/4, 4/3, 45/32, 3/2, 8/5, 5/3, 16/9, 15/8];
+
+// Diatonic scale intervals in semitones (major scale: W W H W W W H)
+const DIATONIC_INTERVALS = [0, 2, 4, 5, 7, 9, 11];
+
+function getDiatonicNotes(root) {
+  const ri = NOTE_INDEX[root];
+  return new Set(DIATONIC_INTERVALS.map(iv => NOTE_NAMES[(ri + iv) % 12]));
+}
 
 function getMidiNumber(noteName, octave) {
   return (octave + 1) * 12 + NOTE_INDEX[noteName];
@@ -299,12 +312,14 @@ const TIMBRES = { sine: createSine, warmPad: createWarmPad, brightPad: createBri
 
 // ===== Chord Data =====
 const CHORD_TYPES = [
-  { id: 'major', name: 'Maj', intervals: [0, 4, 7] },
-  { id: 'minor', name: 'Min', intervals: [0, 3, 7] },
-  { id: 'dom7',  name: '7',   intervals: [0, 4, 7, 10] },
-  { id: 'dim',   name: 'Dim', intervals: [0, 3, 6] },
+  { id: 'major',   name: 'Maj',  intervals: [0, 4, 7] },
+  { id: 'minor',   name: 'Min',  intervals: [0, 3, 7] },
+  { id: 'dom7',    name: '7',    intervals: [0, 4, 7, 10] },
+  { id: 'maj7',    name: 'Maj7', intervals: [0, 4, 7, 11] },
+  { id: 'min7',    name: 'Min7', intervals: [0, 3, 7, 10] },
+  { id: 'dim',     name: 'Dim',  intervals: [0, 3, 6] },
   { id: 'halfdim', name: 'Hdim', intervals: [0, 3, 6, 10] },
-  { id: 'aug',   name: 'Aug', intervals: [0, 4, 8] },
+  { id: 'aug',     name: 'Aug',  intervals: [0, 4, 8] },
 ];
 
 function getChordNotes(rootName, chordTypeId, octave) {
@@ -321,6 +336,7 @@ function getChordNotes(rootName, chordTypeId, octave) {
 let audioCtx = null, masterGain = null, masterVolume = 0.7;
 const voices = new Map();
 const FADE_IN = 0.03, FADE_OUT = 0.05;
+const PER_VOICE_GAIN = 0.35;
 
 function initAudio() {
   if (audioCtx) { if (audioCtx.state === 'suspended') audioCtx.resume(); return; }
@@ -337,28 +353,21 @@ function setMasterVolume(vol) {
   if (masterGain) masterGain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.02);
 }
 
-function updateVolumeScaling() {
-  if (!masterGain) return;
-  const count = voices.size;
-  masterGain.gain.setTargetAtTime(count > 0 ? masterVolume / Math.sqrt(count) : masterVolume, audioCtx.currentTime, 0.05);
-}
-
 function startVoice(id, frequency, timbreId) {
   if (!audioCtx || voices.has(id)) return;
   const factory = TIMBRES[timbreId]; if (!factory) return;
   const { nodes, output, oscillators } = factory(audioCtx, frequency);
   const vg = audioCtx.createGain();
   vg.gain.setValueAtTime(0, audioCtx.currentTime);
-  vg.gain.linearRampToValueAtTime(1, audioCtx.currentTime + FADE_IN);
+  vg.gain.linearRampToValueAtTime(PER_VOICE_GAIN, audioCtx.currentTime + FADE_IN);
   output.connect(vg); vg.connect(masterGain);
   oscillators.forEach(o => o.start());
   voices.set(id, { nodes, oscillators, voiceGain: vg, frequency, timbreId });
-  updateVolumeScaling();
 }
 
 function stopVoice(id) {
   const v = voices.get(id); if (!v) return Promise.resolve();
-  voices.delete(id); updateVolumeScaling();
+  voices.delete(id);
   const now = audioCtx.currentTime;
   v.voiceGain.gain.cancelScheduledValues(now);
   v.voiceGain.gain.setValueAtTime(v.voiceGain.gain.value, now);
@@ -409,14 +418,15 @@ const tuningSysEl = document.getElementById('tuning-system');
 const a4RefInput = document.getElementById('a4-ref');
 const jiRootGroup = document.getElementById('ji-root-group');
 const jiRootSelect = document.getElementById('ji-root');
+const tuningGroup = document.getElementById('tuning-group');
+const a4Group = document.getElementById('a4-group');
 const octaveSelect = document.getElementById('octave-select');
 const volumeSlider = document.getElementById('volume-slider');
 const clearAllBtn = document.getElementById('clear-all');
 const modeTabs = document.querySelectorAll('.tab');
 
-const SHARPS = new Set(['C#', 'D#', 'F#', 'G#', 'A#']);
-
 function tuningOpts() { return { system: state.tuningSystem, a4Ref: state.a4Ref, jiRoot: state.jiRoot }; }
+function chordTuningOpts(root) { return { system: 'just', a4Ref: state.a4Ref, jiRoot: root }; }
 function nid(name, oct) { return `${name}${oct}`; }
 
 function ensureAudio() { initAudio(); setMasterVolume(state.volume); }
@@ -432,7 +442,7 @@ function buildNoteGrid() {
   noteGrid.innerHTML = '';
   NOTE_NAMES.forEach(name => {
     const btn = document.createElement('button');
-    btn.className = 'note-btn' + (SHARPS.has(name) ? ' sharp' : '');
+    btn.className = 'note-btn';
     btn.dataset.note = name;
     btn.innerHTML = `<span class="note-name">${name}</span><span class="note-freq"></span>`;
     btn.addEventListener('pointerdown', e => { e.preventDefault(); handleNoteClick(name); });
@@ -459,11 +469,19 @@ function buildChordGrid() {
 
 // ===== Render =====
 function render() {
+  // Determine which notes are "highlighted" (diatonic) in drone mode
+  const isDiatonic = (state.tuningSystem === 'just')
+    ? getDiatonicNotes(state.jiRoot)
+    : getDiatonicNotes('C'); // C major = white keys for 12-TET
+
   const activeNames = new Set();
   for (const [, info] of state.activeDrones) { if (info.octave === state.octave) activeNames.add(info.noteName); }
+
   noteGrid.querySelectorAll('.note-btn').forEach(btn => {
     const name = btn.dataset.note;
     btn.classList.toggle('active', activeNames.has(name));
+    btn.classList.toggle('diatonic', isDiatonic.has(name));
+    btn.classList.toggle('chromatic', !isDiatonic.has(name));
     const fe = btn.querySelector('.note-freq');
     if (fe) fe.textContent = getFrequency(name, state.octave, tuningOpts()).toFixed(1) + ' Hz';
   });
@@ -485,9 +503,14 @@ function render() {
     btn.classList.toggle('active', btn.dataset.root === state.activeChordRoot && btn.dataset.chord === state.activeChordType);
   });
 
-  jiRootGroup.classList.toggle('visible', state.tuningSystem === 'just');
-  dronePanel.classList.toggle('active', state.mode === 'drone');
-  chordPanel.classList.toggle('active', state.mode === 'chord');
+  // Show/hide drone-only settings
+  const isDrone = state.mode === 'drone';
+  tuningGroup.classList.toggle('visible', isDrone);
+  a4Group.classList.toggle('visible', isDrone);
+  jiRootGroup.classList.toggle('visible', isDrone && state.tuningSystem === 'just');
+
+  dronePanel.classList.toggle('active', isDrone);
+  chordPanel.classList.toggle('active', !isDrone);
   modeTabs.forEach(t => t.classList.toggle('active', t.dataset.mode === state.mode));
 }
 
@@ -506,9 +529,10 @@ function handleChordClick(root, type) {
     clearAllVoices(); state.activeDrones.clear(); state.activeChordRoot = null; state.activeChordType = null; render(); return;
   }
   clearAllVoices(); state.activeDrones.clear();
+  const opts = chordTuningOpts(root);
   getChordNotes(root, type, state.octave).forEach(n => {
     const id = nid(n.noteName, n.octave);
-    startVoice(id, getFrequency(n.noteName, n.octave, tuningOpts()), state.timbre);
+    startVoice(id, getFrequency(n.noteName, n.octave, opts), state.timbre);
     state.activeDrones.set(id, { noteName: n.noteName, octave: n.octave });
   });
   state.activeChordRoot = root; state.activeChordType = type; render();
