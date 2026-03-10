@@ -110,6 +110,10 @@ header h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.03em; }
 .drone-only { display: none; }
 .drone-only.visible { display: flex; }
 
+.volume-bar {
+  display: flex; align-items: flex-end; gap: 10px;
+  padding: 8px 16px; border-bottom: 1px solid var(--border);
+}
 .btn-clear {
   padding: 6px 14px; background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: var(--radius-sm); font-family: var(--font); font-size: 0.8rem;
@@ -163,7 +167,7 @@ main { padding: 16px; padding-bottom: 12px; }
 .note-btn.chromatic.active { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
 
 .active-notes-display {
-  margin-top: 12px; min-height: 28px; padding: 8px 12px;
+  margin-top: 12px; min-height: 38px; padding: 8px 12px;
   background: rgba(255, 255, 255, 0.02); border-radius: var(--radius);
   border: 1px solid rgba(255, 255, 255, 0.04);
   font-size: 0.85rem; color: var(--text-secondary);
@@ -254,9 +258,11 @@ main { padding: 16px; padding-bottom: 12px; }
         <option value="A#">A#</option><option value="B">B</option>
       </select>
     </div>
+  </div>
+  <div class="volume-bar">
     <div class="setting-group">
       <label for="volume-slider">Volume</label>
-      <input id="volume-slider" type="range" min="0" max="100" value="70">
+      <input id="volume-slider" type="range" min="0" max="100" value="100">
     </div>
     <button id="clear-all" class="btn-clear">Clear All</button>
   </div>
@@ -380,16 +386,28 @@ function getChordNotes(rootName, chordTypeId, octave) {
 }
 
 // ===== Audio Engine =====
-let audioCtx = null, masterGain = null, masterVolume = 0.7;
+let audioCtx = null, masterGain = null, limiter = null, masterVolume = 1.0;
 const voices = new Map();
 const FADE_IN = 0.03, FADE_OUT = 0.05;
-const PER_VOICE_GAIN = 0.35;
+const BASE_VOICE_GAIN = 0.25;
+
+function voiceGainFor(n) { return BASE_VOICE_GAIN / Math.sqrt(Math.max(n, 1)); }
+
+function rebalanceVoices() {
+  if (!audioCtx) return;
+  const g = voiceGainFor(voices.size);
+  const t = audioCtx.currentTime;
+  for (const v of voices.values()) v.voiceGain.gain.setTargetAtTime(g, t, 0.04);
+}
 
 function initAudio() {
   if (audioCtx) { if (audioCtx.state === 'suspended') audioCtx.resume(); return; }
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   masterGain = audioCtx.createGain(); masterGain.gain.value = masterVolume;
-  masterGain.connect(audioCtx.destination);
+  limiter = audioCtx.createDynamicsCompressor();
+  limiter.threshold.value = -3; limiter.knee.value = 3;
+  limiter.ratio.value = 20; limiter.attack.value = 0.001; limiter.release.value = 0.1;
+  masterGain.connect(limiter); limiter.connect(audioCtx.destination);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   });
@@ -406,15 +424,17 @@ function startVoice(id, frequency, timbreId) {
   const { nodes, output, oscillators } = factory(audioCtx, frequency);
   const vg = audioCtx.createGain();
   vg.gain.setValueAtTime(0, audioCtx.currentTime);
-  vg.gain.linearRampToValueAtTime(PER_VOICE_GAIN, audioCtx.currentTime + FADE_IN);
+  vg.gain.linearRampToValueAtTime(voiceGainFor(voices.size + 1), audioCtx.currentTime + FADE_IN);
   output.connect(vg); vg.connect(masterGain);
   oscillators.forEach(o => o.start());
   voices.set(id, { nodes, oscillators, voiceGain: vg, frequency, timbreId });
+  rebalanceVoices();
 }
 
 function stopVoice(id) {
   const v = voices.get(id); if (!v) return Promise.resolve();
   voices.delete(id);
+  rebalanceVoices();
   const now = audioCtx.currentTime;
   v.voiceGain.gain.cancelScheduledValues(now);
   v.voiceGain.gain.setValueAtTime(v.voiceGain.gain.value, now);
@@ -450,7 +470,7 @@ function updateFrequencies(freqMap, timbreId) {
 // ===== State =====
 const state = {
   mode: 'drone', timbre: 'sine', tuningSystem: '12tet', a4Ref: 440,
-  jiRoot: 'A', octave: 4, volume: 0.7,
+  jiRoot: 'A', octave: 4, volume: 1.0,
   activeDrones: new Map(), activeChordRoot: null, activeChordType: null,
 };
 
