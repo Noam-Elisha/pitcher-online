@@ -267,6 +267,124 @@ main { padding: 18px; padding-bottom: 14px; }
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 4px; }
+
+/* ===== Sequencer ===== */
+.seq-transport {
+  display: flex; flex-direction: column; gap: 10px;
+  padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.seq-row {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px;
+}
+.seq-btn {
+  padding: 8px 14px; background: var(--bg-elevated); color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s ease; touch-action: manipulation;
+}
+.seq-btn:hover { background: var(--bg-hover); }
+.seq-btn:active { transform: scale(0.96); }
+.seq-play-btn.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff;
+  box-shadow: 0 0 16px rgba(37,99,235,0.35);
+}
+.seq-toggle {
+  display: flex; align-items: center; gap: 5px; cursor: pointer;
+  font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  align-self: flex-end; padding-bottom: 4px;
+}
+.seq-toggle input { accent-color: var(--accent); }
+
+.seq-beat-list {
+  max-height: 240px; overflow-y: auto; display: grid;
+  grid-template-columns: repeat(4, 1fr); gap: 3px;
+  padding: 2px 0; scroll-behavior: smooth;
+}
+.seq-beat-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 8px 4px; background: var(--bg-elevated); min-height: 52px;
+  border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all 0.15s ease; touch-action: manipulation;
+  user-select: none; -webkit-user-select: none;
+}
+.seq-beat-item:hover { background: var(--bg-hover); }
+.seq-beat-item.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+.seq-beat-item.current {
+  background: linear-gradient(135deg, rgba(37,99,235,0.18), rgba(37,99,235,0.08));
+  border-color: rgba(77,158,255,0.4);
+}
+.seq-beat-num {
+  font-size: 0.6rem; font-weight: 700; color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+.seq-beat-label { font-size: 0.75rem; font-weight: 600; text-align: center; }
+.seq-beat-label.rest { color: var(--text-secondary); font-style: italic; }
+.seq-beat-label.continue { color: var(--text-secondary); }
+
+.seq-beat-controls { display: flex; gap: 8px; margin-top: 10px; }
+.seq-add-btn { flex: 1; }
+.seq-remove-btn {
+  background: rgba(248,113,113,0.08); color: var(--danger);
+  border-color: rgba(248,113,113,0.2);
+}
+.seq-remove-btn:hover { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.35); }
+.seq-remove-btn:disabled { opacity: 0.3; cursor: default; }
+.seq-remove-btn:disabled:hover { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.2); }
+
+.seq-editor {
+  margin-top: 12px; padding: 12px;
+  background: rgba(255,255,255,0.02); border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.seq-editor-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
+}
+#seq-editor-title { font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); }
+.seq-type-tabs {
+  display: flex; gap: 2px; background: rgba(255,255,255,0.04);
+  border-radius: 10px; padding: 2px;
+}
+.seq-type-btn {
+  padding: 5px 12px; border: none; background: transparent;
+  color: var(--text-secondary); font-family: var(--font); font-size: 0.7rem;
+  font-weight: 600; border-radius: 8px; cursor: pointer;
+  transition: all 0.2s ease; touch-action: manipulation;
+}
+.seq-type-btn:hover { color: var(--text-primary); }
+.seq-type-btn.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff;
+}
+.seq-click-div-group { display: none; }
+.seq-click-div-group.visible { display: flex; }
+.seq-chord-picker { display: none; }
+.seq-chord-picker.visible { display: block; }
+.seq-root-row {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px;
+}
+.seq-chordtype-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+}
+.seq-pick-btn {
+  padding: 9px 2px; background: var(--bg-elevated); color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm);
+  font-family: var(--font); font-size: 0.75rem; font-weight: 600; text-align: center;
+  cursor: pointer; transition: all 0.2s ease; touch-action: manipulation;
+}
+.seq-pick-btn:hover { background: var(--bg-hover); }
+.seq-pick-btn:active { transform: scale(0.95); }
+.seq-pick-btn.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff;
+  border-color: rgba(77,158,255,0.4);
+}
+
+@media (max-width: 479px) {
+  .seq-transport { gap: 6px; }
+  .seq-root-row { grid-template-columns: repeat(4, 1fr); }
+  .seq-beat-list { max-height: 180px; }
+  .seq-type-btn { padding: 5px 8px; font-size: 0.65rem; }
+}
   </style>
 </head>
 <body>
@@ -276,6 +394,7 @@ main { padding: 18px; padding-bottom: 14px; }
     <div class="mode-tabs">
       <button class="tab active" data-mode="drone">Drone</button>
       <button class="tab" data-mode="chord">Chord</button>
+      <button class="tab" data-mode="seq">Seq</button>
     </div>
   </header>
 
@@ -328,6 +447,61 @@ main { padding: 18px; padding-bottom: 14px; }
     </div>
     <div id="chord-panel" class="panel">
       <div class="chord-grid" id="chord-grid"></div>
+    </div>
+    <div id="seq-panel" class="panel">
+      <div class="seq-transport">
+        <div class="seq-row">
+          <div class="setting-group">
+            <label for="seq-bpm">BPM</label>
+            <input id="seq-bpm" type="number" value="120" min="20" max="300" step="1">
+          </div>
+          <div class="setting-group">
+            <label for="seq-countin">Count-in</label>
+            <input id="seq-countin" type="number" value="4" min="0" max="8" step="1">
+          </div>
+          <label class="seq-toggle">
+            <input type="checkbox" id="seq-loop" checked>
+            <span>Loop</span>
+          </label>
+          <label class="seq-toggle">
+            <input type="checkbox" id="seq-metro">
+            <span>Click</span>
+          </label>
+          <div class="setting-group seq-click-div-group">
+            <select id="seq-click-div">
+              <option value="0.5">&#x1D15E;</option>
+              <option value="1" selected>&#x2669;</option>
+              <option value="2">&#x266A;</option>
+              <option value="4">&#x266C;</option>
+              <option value="8">&#x266C;&#x266C;</option>
+            </select>
+          </div>
+        </div>
+        <div class="seq-row">
+          <button id="seq-play" class="seq-btn seq-play-btn" aria-label="Play">&#9654; Play</button>
+          <button id="seq-play-from" class="seq-btn" aria-label="Play from selection">&#9654; From Sel</button>
+          <button id="seq-stop" class="seq-btn" aria-label="Stop">&#9632; Stop</button>
+        </div>
+      </div>
+      <div class="seq-beat-list" id="seq-beat-list"></div>
+      <div class="seq-beat-controls">
+        <button id="seq-add-beat" class="seq-btn seq-add-btn">+ Add Beat</button>
+        <button id="seq-remove-beat" class="seq-btn seq-remove-btn">- Remove</button>
+      </div>
+      <div class="seq-editor" id="seq-editor">
+        <div class="seq-editor-header">
+          <span id="seq-editor-title">Beat 1</span>
+          <div class="seq-type-tabs">
+            <button class="seq-type-btn" data-beattype="chord">Chord</button>
+            <button class="seq-type-btn" data-beattype="continue">Sustain</button>
+            <button class="seq-type-btn" data-beattype="rest">Rest</button>
+          </div>
+        </div>
+        <div class="seq-chord-picker" id="seq-chord-picker">
+          <div class="seq-root-row" id="seq-root-row"></div>
+          <div class="seq-chordtype-row" id="seq-chordtype-row"></div>
+        </div>
+      </div>
     </div>
   </main>
   <div class="octave-nav">
@@ -526,6 +700,16 @@ const state = {
   mode: 'drone', timbre: 'sine', tuningSystem: '12tet', a4Ref: 440,
   jiRoot: 'A', octave: 4, volume: 1.0,
   activeDrones: new Map(), activeChordRoot: null, activeChordType: null,
+  seq: {
+    beats: [
+      { type: 'chord', root: 'C', chordType: 'major' },
+      { type: 'continue' },
+      { type: 'chord', root: 'F', chordType: 'major' },
+      { type: 'continue' },
+    ],
+    bpm: 120, countIn: 4, loop: true, metro: false, clickDiv: 1, playing: false,
+    currentBeat: -1, selectedBeat: 0,
+  },
 };
 
 // ===== DOM =====
@@ -547,6 +731,23 @@ const octaveLabel = document.getElementById('octave-label');
 const volumeSlider = document.getElementById('volume-slider');
 const clearAllBtn = document.getElementById('clear-all');
 const modeTabs = document.querySelectorAll('.tab');
+const seqPanel = document.getElementById('seq-panel');
+const seqBeatList = document.getElementById('seq-beat-list');
+const seqBpmInput = document.getElementById('seq-bpm');
+const seqCountInInput = document.getElementById('seq-countin');
+const seqLoopCheckbox = document.getElementById('seq-loop');
+const seqMetroCheckbox = document.getElementById('seq-metro');
+const seqClickDivSelect = document.getElementById('seq-click-div');
+const seqPlayBtn = document.getElementById('seq-play');
+const seqPlayFromBtn = document.getElementById('seq-play-from');
+const seqStopBtn = document.getElementById('seq-stop');
+const seqAddBeatBtn = document.getElementById('seq-add-beat');
+const seqRemoveBeatBtn = document.getElementById('seq-remove-beat');
+const seqEditor = document.getElementById('seq-editor');
+const seqEditorTitle = document.getElementById('seq-editor-title');
+const seqChordPicker = document.getElementById('seq-chord-picker');
+const seqRootRow = document.getElementById('seq-root-row');
+const seqChordTypeRow = document.getElementById('seq-chordtype-row');
 
 function tuningOpts() { return { system: state.tuningSystem, a4Ref: state.a4Ref, jiRoot: state.jiRoot }; }
 function chordTuningOpts(root) { return { system: 'just', a4Ref: state.a4Ref, jiRoot: root }; }
@@ -588,6 +789,79 @@ function buildChordGrid() {
     });
     row.appendChild(types); chordGrid.appendChild(row);
   });
+}
+
+function buildSeqChordPicker() {
+  seqRootRow.innerHTML = '';
+  NOTE_NAMES.forEach(name => {
+    const btn = document.createElement('button'); btn.className = 'seq-pick-btn';
+    btn.dataset.root = name; btn.textContent = name;
+    btn.addEventListener('pointerdown', e => { e.preventDefault(); seqPickRoot(name); });
+    seqRootRow.appendChild(btn);
+  });
+  seqChordTypeRow.innerHTML = '';
+  CHORD_TYPES.forEach(ct => {
+    const btn = document.createElement('button'); btn.className = 'seq-pick-btn';
+    btn.dataset.chordtype = ct.id; btn.textContent = ct.name;
+    btn.addEventListener('pointerdown', e => { e.preventDefault(); seqPickChordType(ct.id); });
+    seqChordTypeRow.appendChild(btn);
+  });
+}
+
+function seqBeatLabel(beat) {
+  if (beat.type === 'rest') return { text: 'Rest', cls: 'rest' };
+  if (beat.type === 'continue') return { text: '\u2014', cls: 'continue' };
+  const ct = CHORD_TYPES.find(c => c.id === beat.chordType);
+  return { text: `${beat.root} ${ct ? ct.name : beat.chordType}`, cls: '' };
+}
+
+function renderSeqBeatList() {
+  const items = seqBeatList.querySelectorAll('.seq-beat-item');
+  items.forEach((item, i) => {
+    item.classList.toggle('selected', i === state.seq.selectedBeat);
+    item.classList.toggle('current', state.seq.playing && i === state.seq.currentBeat);
+  });
+}
+
+function buildSeqBeatList() {
+  seqBeatList.innerHTML = '';
+  state.seq.beats.forEach((beat, i) => {
+    const item = document.createElement('div'); item.className = 'seq-beat-item';
+    if (i === state.seq.selectedBeat) item.classList.add('selected');
+    if (state.seq.playing && i === state.seq.currentBeat) item.classList.add('current');
+    const num = document.createElement('span'); num.className = 'seq-beat-num';
+    num.textContent = i + 1;
+    const label = document.createElement('span');
+    const info = seqBeatLabel(beat);
+    label.className = 'seq-beat-label' + (info.cls ? ' ' + info.cls : '');
+    label.textContent = info.text;
+    item.appendChild(num); item.appendChild(label);
+    item.addEventListener('pointerdown', e => { e.preventDefault(); state.seq.selectedBeat = i; renderSeqPanel(); });
+    seqBeatList.appendChild(item);
+  });
+}
+
+function renderSeqPanel() {
+  buildSeqBeatList();
+  seqPlayBtn.classList.toggle('active', state.seq.playing);
+  seqRemoveBeatBtn.disabled = state.seq.beats.length <= 1;
+  seqEditorTitle.textContent = 'Beat ' + (state.seq.selectedBeat + 1);
+  const beat = state.seq.beats[state.seq.selectedBeat];
+  // Type tabs
+  seqEditor.querySelectorAll('.seq-type-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.beattype === beat.type);
+  });
+  // Chord picker visibility
+  seqChordPicker.classList.toggle('visible', beat.type === 'chord');
+  // Root + type highlights
+  if (beat.type === 'chord') {
+    seqRootRow.querySelectorAll('.seq-pick-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.root === beat.root);
+    });
+    seqChordTypeRow.querySelectorAll('.seq-pick-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.chordtype === beat.chordType);
+    });
+  }
 }
 
 // ===== Render =====
@@ -633,12 +907,172 @@ function render() {
   jiRootGroup.classList.toggle('visible', isDrone && state.tuningSystem === 'just');
 
   dronePanel.classList.toggle('active', isDrone);
-  chordPanel.classList.toggle('active', !isDrone);
+  chordPanel.classList.toggle('active', state.mode === 'chord');
+  seqPanel.classList.toggle('active', state.mode === 'seq');
   modeTabs.forEach(t => t.classList.toggle('active', t.dataset.mode === state.mode));
+
+  if (state.mode === 'seq') renderSeqPanel();
 
   octaveLabel.textContent = 'Octave ' + state.octave;
   octaveDownBtn.disabled = state.octave <= 0;
   octaveUpBtn.disabled = state.octave >= 8;
+}
+
+// ===== Sequencer Logic =====
+function seqAddBeat() {
+  state.seq.beats.push({ type: 'continue' });
+  state.seq.selectedBeat = state.seq.beats.length - 1;
+  render();
+  // Scroll to new beat
+  requestAnimationFrame(() => {
+    const last = seqBeatList.lastElementChild;
+    if (last) last.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+}
+
+function seqRemoveBeat() {
+  if (state.seq.beats.length <= 1) return;
+  state.seq.beats.splice(state.seq.selectedBeat, 1);
+  if (state.seq.selectedBeat >= state.seq.beats.length) state.seq.selectedBeat = state.seq.beats.length - 1;
+  render();
+}
+
+function seqPickRoot(root) {
+  const beat = state.seq.beats[state.seq.selectedBeat];
+  if (beat.type === 'chord') { beat.root = root; renderSeqPanel(); }
+}
+
+function seqPickChordType(chordType) {
+  const beat = state.seq.beats[state.seq.selectedBeat];
+  if (beat.type === 'chord') { beat.chordType = chordType; renderSeqPanel(); }
+}
+
+function seqSetBeatType(type) {
+  if (type === 'chord') {
+    const prev = state.seq.beats[state.seq.selectedBeat];
+    state.seq.beats[state.seq.selectedBeat] = prev.type === 'chord'
+      ? prev : { type: 'chord', root: 'C', chordType: 'major' };
+  } else {
+    state.seq.beats[state.seq.selectedBeat] = { type };
+  }
+  renderSeqPanel();
+}
+
+// Scheduler
+const SEQ_LOOKAHEAD = 0.1;
+const SEQ_INTERVAL = 25;
+let seqTimerId = null;
+let seqNextBeatTime = 0;
+let seqBeatIndex = 0;
+let seqCountInLeft = 0;
+let seqLastChord = null;
+
+function playClick(time, high) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'sine'; osc.frequency.value = high ? 1200 : 900;
+  g.gain.setValueAtTime(0.25, time);
+  g.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(time); osc.stop(time + 0.1);
+}
+
+function seqPlayChord(root, chordType) {
+  if (seqLastChord && seqLastChord.root === root && seqLastChord.chordType === chordType) return;
+  clearAllVoices(); state.activeDrones.clear();
+  const opts = chordTuningOpts(root);
+  getChordNotes(root, chordType, state.octave).forEach(n => {
+    const id = nid(n.noteName, n.octave);
+    startVoice(id, getFrequency(n.noteName, n.octave, opts), state.timbre);
+    state.activeDrones.set(id, { noteName: n.noteName, octave: n.octave });
+  });
+  seqLastChord = { root, chordType };
+}
+
+function seqSilence() {
+  clearAllVoices(); state.activeDrones.clear(); seqLastChord = null;
+}
+
+function seqScheduleBeat(time) {
+  const delay = Math.max(0, (time - audioCtx.currentTime) * 1000);
+  if (seqCountInLeft > 0) {
+    const isFirst = seqCountInLeft === state.seq.countIn;
+    playClick(time, isFirst);
+    seqCountInLeft--;
+    setTimeout(() => {
+      if (!state.seq.playing) return;
+      state.seq.currentBeat = -1;
+      renderSeqBeatList();
+    }, delay);
+    return;
+  }
+  const beat = state.seq.beats[seqBeatIndex];
+  if (state.seq.metro) {
+    const div = state.seq.clickDiv;
+    const beatDur = 60.0 / state.seq.bpm;
+    if (div >= 1) {
+      // Quarter, eighth, sixteenth: play div clicks per beat
+      for (let i = 0; i < div; i++) {
+        playClick(time + (i * beatDur / div), i === 0 && seqBeatIndex === 0);
+      }
+    } else {
+      // Half note: click every other beat
+      if (seqBeatIndex % 2 === 0) playClick(time, seqBeatIndex === 0);
+    }
+  }
+  setTimeout(() => {
+    if (!state.seq.playing) return;
+    if (beat.type === 'chord') seqPlayChord(beat.root, beat.chordType);
+    else if (beat.type === 'rest') seqSilence();
+    // 'continue' does nothing
+    state.seq.currentBeat = seqBeatIndex;
+    renderSeqBeatList();
+    // auto-scroll
+    const cur = seqBeatList.querySelector('.seq-beat-item.current');
+    if (cur) cur.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, delay);
+  seqBeatIndex++;
+  if (seqBeatIndex >= state.seq.beats.length) {
+    if (state.seq.loop) { seqBeatIndex = 0; }
+    else {
+      // Schedule stop after this beat plays
+      setTimeout(() => { if (state.seq.playing) seqStop(); }, delay + (60000 / state.seq.bpm));
+      seqBeatIndex = 0; // reset but won't be used since we stop
+    }
+  }
+}
+
+function seqScheduler() {
+  while (seqNextBeatTime < audioCtx.currentTime + SEQ_LOOKAHEAD) {
+    seqScheduleBeat(seqNextBeatTime);
+    seqNextBeatTime += 60.0 / state.seq.bpm;
+  }
+  if (state.seq.playing) seqTimerId = setTimeout(seqScheduler, SEQ_INTERVAL);
+}
+
+function seqStart(fromIndex) {
+  ensureAudio();
+  if (state.seq.playing) return;
+  if (state.seq.beats.length === 0) return;
+  state.seq.playing = true;
+  state.seq.currentBeat = -1;
+  seqCountInLeft = state.seq.countIn;
+  seqBeatIndex = fromIndex || 0;
+  seqLastChord = null;
+  seqNextBeatTime = audioCtx.currentTime + 0.05;
+  seqScheduler();
+  render();
+}
+
+function seqStop() {
+  if (seqTimerId !== null) { clearTimeout(seqTimerId); seqTimerId = null; }
+  state.seq.playing = false;
+  state.seq.currentBeat = -1;
+  seqLastChord = null;
+  clearAllVoices(); state.activeDrones.clear();
+  state.activeChordRoot = null; state.activeChordType = null;
+  render();
 }
 
 // ===== Handlers =====
@@ -697,17 +1131,45 @@ clearAllBtn.addEventListener('pointerdown', e => {
 modeTabs.forEach(tab => {
   tab.addEventListener('pointerdown', e => {
     e.preventDefault(); const mode = tab.dataset.mode; if (mode === state.mode) return;
+    if (state.seq.playing) seqStop();
     clearAllVoices(); state.activeDrones.clear();
     state.activeChordRoot = null; state.activeChordType = null; state.mode = mode;
-    if (mode === 'chord' && state.octave > 5) { state.octave = 3; }
+    if ((mode === 'chord' || mode === 'seq') && state.octave > 5) { state.octave = 3; }
     render();
   });
+});
+
+// ===== Sequencer Event Listeners =====
+seqPlayBtn.addEventListener('pointerdown', e => { e.preventDefault(); seqStart(); });
+seqPlayFromBtn.addEventListener('pointerdown', e => { e.preventDefault(); seqStart(state.seq.selectedBeat); });
+seqStopBtn.addEventListener('pointerdown', e => { e.preventDefault(); seqStop(); });
+seqBpmInput.addEventListener('change', () => {
+  const v = parseInt(seqBpmInput.value);
+  if (!isNaN(v) && v >= 20 && v <= 300) state.seq.bpm = v;
+  else seqBpmInput.value = state.seq.bpm;
+});
+seqCountInInput.addEventListener('change', () => {
+  const v = parseInt(seqCountInInput.value);
+  if (!isNaN(v) && v >= 0 && v <= 8) state.seq.countIn = v;
+  else seqCountInInput.value = state.seq.countIn;
+});
+seqLoopCheckbox.addEventListener('change', () => { state.seq.loop = seqLoopCheckbox.checked; });
+seqMetroCheckbox.addEventListener('change', () => {
+  state.seq.metro = seqMetroCheckbox.checked;
+  document.querySelector('.seq-click-div-group').classList.toggle('visible', state.seq.metro);
+});
+seqClickDivSelect.addEventListener('change', () => { state.seq.clickDiv = parseFloat(seqClickDivSelect.value); });
+seqAddBeatBtn.addEventListener('pointerdown', e => { e.preventDefault(); seqAddBeat(); });
+seqRemoveBeatBtn.addEventListener('pointerdown', e => { e.preventDefault(); seqRemoveBeat(); });
+seqEditor.querySelectorAll('.seq-type-btn').forEach(btn => {
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); seqSetBeatType(btn.dataset.beattype); });
 });
 
 // ===== Init =====
 ensureAudio();
 buildNoteGrid();
 buildChordGrid();
+buildSeqChordPicker();
 render();
   </script>
 </body>
